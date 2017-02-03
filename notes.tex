@@ -50,7 +50,7 @@ With that information the input parameters that I ended up using were:
 	\item {\tt dens\_base = 4.97d2}
 	\item {\tt temp\_base = 2.02e7}
 	\item {\tt temp\_fluff = 4.1e3}
-	\item {\tt low\_density\_cutoff = 1.4d-3}
+	\item {\tt low\_density\_cutoff = 1.4d-6}
 	\item {\tt M\_conv\_zone = 1.5d1}
 	\item {\tt xmin = 0.0}
 	\item {\tt xmax = 1.2e10}
@@ -139,7 +139,7 @@ radiation.kappa_p_exp_n = 3.5
 
 \subsection{Boundary Conditions}
 
-The r  boundary of the domain specifies the flux coming from
+The z boundary of the domain specifies the flux coming from
 the pulsar.  For the planet problem Weiqun suggested the Sanchez-Pomraning BC, which is a Neumann-like BC that allows for an incoming and outgoing flux.
 
 The planet notes give the following explanation which I modified for this problem. The form of the flux is $F = cE_r$, where $E_r$ is the radiation energy density.  This flux has units of $\mathrm{erg~cm^{-2}~s^{-1}}$.
@@ -151,9 +151,17 @@ where $L_\star$ is the luminosity of the pulsar and $d$ is the
 distance between the companion and the pulsar.
 
 
-From \cite{0004-637X-769-2-108}, using values for B1952+20,  $L_\star = 2\times 10^{33}\mathrm{erg~s^{-1}}$ and $d = 2.49R_\odot$,  we get $f =
+   From \cite{0004-637X-769-2-108}, using values for B1952+20,  $L_\star = 2\times 10^{33}\mathrm{erg~s^{-1}}$ and $d = 2.49R_\odot$,  we get $f =
 5.3\times 10^9~\mathrm{erg~cm^{-2}~s^{-1}}$.
 
+Since at the moment we were not seeing the flux, now we are using $5\times 10^15$ 
+
+   \subsection{bc\_fill\_2d.f90}
+   We will be modifying the subroutine ca\_radfill so that the hyperbolic BC for the radiation energy take into account the radiation flux entering the boundary? For that we can take a similar approach than the mention in \cite{advinrad} using 
+   
+   $$F_{in} = \frac{c}{4} E_r - \frac{1}{2}$$
+   $$F_{out} = \frac{c}{4} E_r + \frac{1}{2}$$
+   
 
 
 %\nocite{*}
