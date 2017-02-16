@@ -2,7 +2,7 @@
 
 \usepackage[margin=1in]{geometry}
 
-\usepackage{mathpazo}
+\usepackage{amsmath}
 \usepackage{graphicx}
 \usepackage{bm}
 %\usepackage{cite}
@@ -15,43 +15,49 @@
 	
 	From the Castro paper II, \cite{castroGray} in equation (16) we have
 	
-	\begin{equation}	
-	 \frac{\partial E_r}{\partial t} + \nabla \cdot \left( \frac{3-f}{2} E_r \bm{u}\right) - \lambda u \cdot \nabla E_r = c \kappa_P \left( a T^4 - E^{(0)}_r\right) + \nabla \cdot \left( \frac{c\lambda}{\chi_R} \nabla E\right) 
-	\end{equation}
+	\begin{align*}	
+	 \frac{\partial E_r}{\partial t} + \nabla \cdot \left( \frac{3-f}{2} E_r \bm{u}\right) - \lambda \bm{u} \cdot \nabla E_r = c \kappa_P \left( a T^4 - E^{(0)}_r\right) + \nabla \cdot \left( \frac{c\lambda}{\chi_R} \nabla E\right) 
+	\end{align*}
 
-The terms on the left (Hyperbolic subsystem) are solved with the hydro solver, while the terms on the right (parabolic system) are solved with the implicit solver. \\~\\
+The terms on the left (Hyperbolic subsystem) are solved with the hydro solver, while the terms on the right (parabolic system) are solved with the implicit solver. \\
 
-The inputs file specifies the incoming radiation flux to the boundary, which is used to fill the ghost cells for the implicit solver. The hydro solver does not know about this, so the ghost cells for the radiation energy are just filled with the way the hydro BC where specified. \\~\\
+The inputs file specifies the incoming radiation flux to the boundary, which is used to fill the ghost cells for the implicit solver. The hydro solver does not know about this, so the ghost cells for the radiation energy are just filled in the way the hydro BC where specified. \\
 
-What we can do is using Eq. (2.19) from \cite{advinrad} solve it to obtain a way to fill the ghost cell for $E_r$ the following way:
+In order to fill the hydro BC for radiation energy, taking into account the radiation flux comming from the boundary, we can use Eq. (2.19) from the SANDIA report \cite{advinrad} :
 
-\begin{equation}
-	F_{in} = \frac{c}{4}E_r - \frac{1}{2} \hat{n} \cdot F \Rightarrow
-	\hat{n} \cdot F = -2 F_{in} + \frac{c}{2} E_r
-\end{equation}
+\begin{align*}
+	F_{in} = \frac{c}{4}E_r - \frac{1}{2} \bm{\hat{n}} \cdot \bm{F} \Rightarrow
+	\bm{\hat{n}} \cdot \bm{F} = -2 F_{in} + \frac{c}{2} E_r
+\end{align*}
 
-From the SANDIA report (2.1.5) , we have that 
-\begin{equation}
-	F = -c D \nabla E_r
-\end{equation}
+Where the Flux is given by equation (2.1.5) in \cite{advinrad} 
+\begin{align*}
+	\bm{F} = -c D \nabla E_r
+\end{align*}
  
  Therefore
-\begin{equation}
-	\hat{n} F = -cD \frac{\partial E_r}{\partial n}
-\end{equation}
+\begin{align*}
+	\bm{\hat{n}} \cdot \bm{F} = -cD \frac{\partial E_r}{\partial n}
+	\qquad
+	\Rightarrow
+	\qquad
+	\frac{\partial E_r}{\partial n} = \frac{-1}{cD} \bm{\hat{n}} \cdot \bm{F} = \frac{-1}{cD} \left[ -2 F_{in} + \frac{c}{2} E_r\right]
+\end{align*}
 
-Leading to 
-\begin{equation}
-	\frac{\partial E_r}{\partial n} = \frac{-1}{cD} \left[ -2 F_{in} + \frac{c}{2} E_r\right]
-\end{equation}
-
-For let's say coordinate x then gives  
+Then at the boundary, for let's say coordinate x this leads to   
  
-	 \begin{equation}
-	 	\frac{E_{r,ghost} - E_{r,hi}}{\Delta x} =  \frac{-1}{cD} \left[ -2 F_{in} + \frac{c}{2} E_r\right]
-	 \end{equation}
+	 \begin{align*}
+	 	\frac{E_{r,ghost} - E_{r}}{\Delta x} =  \frac{-1}{cD} \left[ -2 F_{in} + \frac{c}{2} E_{r,ghost}\right]
+	 	\qquad ,
+	 	\qquad
+	 	D = \frac{\lambda}{\chi_R}
+	 \end{align*}
 	 
-Where $D = \frac{\lambda}{\chi_R}$ note that is different by a factor of $c$ from Castro paper equation (8) because of the difference in Flux definition from the SANDIA report. (See equation (2.1.5) and (7) )
+Note that $D$ is different by a factor of $c$ from Castro paper equation (8) because of the difference in Flux definition from the SANDIA report. (Equations (2.1.5) and (7) respectively) \\
+
+	\begin{align*}
+		E_{r,ghost} = \frac{2}{2+ c\Delta x} \left[ \frac{2 \Delta x}{cD} F_{in} + E_r\right]
+	\end{align*}
 	
 
 	\bibliography{references}{}
