@@ -5,6 +5,7 @@
 \usepackage{amsmath}
 \usepackage{graphicx}
 \usepackage{bm}
+\usepackage{color}
 %\usepackage{cite}
 
 \newcommand{\gcc}{\mathrm{g~cm^{-3} }}
@@ -21,7 +22,7 @@
 
 The terms on the left (Hyperbolic subsystem) are solved with the hydro solver, while the terms on the right (parabolic system) are solved with the implicit solver. \\
 
-The inputs file specifies the incoming radiation flux to the boundary, which is used to fill the ghost cells for the implicit solver. The hydro solver does not know about this, so the ghost cells for the radiation energy are just filled in the way the hydro BC where specified. \\
+The inputs file specifies the incoming radiation flux $F_{in}$ to the boundary (radiation.hi\_bcval), which is used to fill the ghost cells for the implicit solver. The hydro solver does not know about this, so the ghost cells for the radiation energy are just filled in the way the hydro BC were specified. \\
 
 In order to fill the hydro BC for radiation energy, taking into account the radiation flux comming from the boundary, we can use Eq. (2.19) from the SANDIA report \cite{advinrad} :
 
@@ -47,18 +48,23 @@ Where the Flux is given by equation (2.1.5) in \cite{advinrad}
 Then at the boundary, for let's say coordinate x this leads to   
  
 	 \begin{align*}
-	 	\frac{E_{r,ghost} - E_{r}}{\Delta x} =  \frac{-1}{cD} \left[ -2 F_{in} + \frac{c}{2} E_{r,ghost}\right]
+	 	\frac{E_{r,ghost} - E_{r}}{\Delta x} =  \frac{-1}{cD} \left[ -2 F_{in} + \frac{c}{2} E_{r,ghost?}\right]
 	 	\qquad ,
 	 	\qquad
 	 	D = \frac{\lambda}{\chi_R}
 	 \end{align*}
+\textcolor{blue}{ Question: What value of $E_r$ should we be using on the right side of the equation?}\\
 	 
 Note that $D$ is different by a factor of $c$ from Castro paper equation (8) because of the difference in Flux definition from the SANDIA report. (Equations (2.1.5) and (7) respectively) \\
 
+%		E_{r,ghost} = \frac{2D}{2D+ \Delta x} \left[ \frac{2 \Delta x}{cD} F_{in} + E_r\right]
 	\begin{align*}
-		E_{r,ghost} = \frac{2}{2+ c\Delta x} \left[ \frac{2 \Delta x}{cD} F_{in} + E_r\right]
+		E_{r,ghost} = E_r - \frac{\Delta x}{c D} \left[ -2 F_{in} + \frac{c}{2} E_{r,ghost?}\right]
 	\end{align*}
 	
+	This will be implemented in a bc\_fill\_nd.F90 file in the problem setup with a ca\_radfill() routine\\ 
+	
+	\textcolor{blue}{Question: What should we use for D? We were thinking on having D as a constant from the initialization parameters}
 
 	\bibliography{references}{}
     \bibliographystyle{plain}
